@@ -1,0 +1,8 @@
+# Ignore compiled Python files
+*.pyc
+
+# Ignore sqlite database
+db.sqlite3
+
+# Ignore virtual env
+playground_env
