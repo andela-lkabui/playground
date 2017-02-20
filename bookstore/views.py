@@ -21,3 +21,19 @@ def category_create(request):
         return render(request, 'category-create.html', context, status=201)
     return render(request, 'category-create.html', context)
 
+
+def category_edit(request, categ_id):
+    edit_obj = models.Category.objects.get(pk=categ_id)
+    context = {
+        'category_form': forms.CategoryForm(initial={'name': edit_obj.name}),
+        'categ_id': categ_id
+    }
+    if 'name' in request.POST:
+
+        edit_obj.name = request.POST['name']
+        edit_obj.save()
+
+        context['feedback'] = 'Category of id {0} has been edited\
+            successfully!'.format(edit_obj.id)
+        return render(request, 'category-edit.html', context)
+    return render(request, 'category-edit.html', context)

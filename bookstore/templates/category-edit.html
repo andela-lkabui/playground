@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Edit Category</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'category-edit' categ_id=categ_id %}" method="POST">
+                {% csrf_token %}
+                {{ category_form }}
+                <input type="submit" value="Edit Category" />
+            </form>
+        </div>
+        <div>
+            <p>{{ feedback }}</p>
+        </div>
+    </body>
+</html>

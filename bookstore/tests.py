@@ -104,3 +104,56 @@ class BookstoreTests(TestCase):
             status_code=200,
             html=True
         )
+
+    def test_user_can_edit_category(self):
+        """
+        This test creates a category.
+
+        It then edits the category with new details and asserts that;
+            1. A category was created with the original name 'Mathematics'.
+            2. A category has been edited with a new name 'English'.
+            3. The user gets a feedback message when a Category has been edited.
+            4. A status code of 200 (OK) is returned.
+            5. The template 'category-edit' is used.
+            6. That the maths_obj and eng_obj objects have the same id.
+        """
+        create_url = reverse('category-create')
+
+        maths = {
+            'name': 'Mathematics'
+        }
+        self.client.post(create_url, maths)
+        # assert that category has been created
+        math_obj = models.Category.objects.filter(name=maths['name'])[0]
+        self.assertTrue(math_obj)
+
+        english = {
+            'name': 'English'
+        }
+        kwargs = {
+            'categ_id': math_obj.id
+        }
+        edit_url = reverse('category-edit', kwargs=kwargs)
+        response = self.client.post(edit_url, english)
+
+        self.assertContains(
+            response,
+            '<p>Category of id {0} has been edited successfully!</p>'.format(
+                math_obj.id),
+            count=1,
+            status_code=200,
+            html=True
+        )
+
+        self.assertTemplateUsed(response, 'category-edit.html')
+
+        # assert that object with name 'Mathematics' no longer exists
+        no_math_obj = models.Category.objects.filter(name=maths['name'])
+        self.assertFalse(no_math_obj)
+
+        # assert that object with name 'English' exists
+        eng_obj = models.Category.objects.filter(name=english['name'])[0]
+        self.assertTrue(eng_obj)
+
+        # assert that math_obj and eng_obj have same ID
+        self.assertEqual(eng_obj.id, math_obj.id)
