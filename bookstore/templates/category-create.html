@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Categories</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'category-create' %}" method="POST">
+                {% csrf_token %}
+                {{ category_form }}
+                <input type="submit" value="Create Category" />
+            </form>
+        </div>
+        <div>
+            <p>{{ feedback }}</p>
+        </div>
+        <div>
+            <ul>
+                {% for category in categories %}
+                    <li>{{ category.name }}</li>
+                {% empty %}
+                    <p>No categories created yet.</p>
+                {% endfor %}
+            </ul>
+        </div>
+    </body>
+</html>
