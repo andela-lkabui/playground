@@ -53,3 +53,20 @@ def category_delete(request, categ_id):
         context['category'] = None
     return render(request, 'category-delete.html', context)
 
+
+def book_create(request):
+    context = {
+        'books': models.Book.objects.all(),
+        'book_form': forms.BookForm()
+    }
+    if request.POST:
+        new_book = forms.BookForm(request.POST).save()
+
+        context['books'] = models.Book.objects.all()
+
+        context['feedback'] = '{0} added to {1} category!'.format(
+                new_book.title, new_book.category.name)
+        return render(request, 'book-create.html', context, status=201)
+
+    return render(request, 'book-create.html', context)
+

@@ -11,3 +11,13 @@ class CategoryForm(ModelForm):
     class Meta:
         model = models.Category
         fields = ['name']
+
+
+class BookForm(ModelForm):
+    """
+    The form that is used for creating Books.
+    """
+
+    class Meta:
+        model = models.Book
+        fields = ['category', 'title']

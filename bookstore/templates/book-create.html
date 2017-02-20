@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Create Book</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'book-create' %}" method="POST">
+                {% csrf_token %}
+                {{ book_form }}
+                <input type="submit" value="Create Book" />
+            </form>
+        </div>
+        <hr/>
+        <div>
+            <p>{{ feedback }}</p>
+        </div>
+        <hr/>
+        <div>
+            <ul>
+                {% for book in books %}
+                    <li>{{ book.title }} ({{ book.category.name }})</li>
+                {% empty %}
+                    <p>No books created yet.</p>
+                {% endfor %}
+            </ul>
+        </div>
+    </body>
+</html>

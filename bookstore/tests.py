@@ -223,3 +223,66 @@ class BookstoreTests(TestCase):
         # assert that the category has been deleted from the database
         deleted_categ = models.Category.objects.filter(name=cs['name'])
         self.assertFalse(deleted_categ)
+
+    def test_user_can_create_book_under_category(self):
+        """
+        This tests checks that a user can create a book within an existing
+        category.
+
+        First, a Category, 'Programming', is created.
+        Then a book, 'Java How To Program, , 4th Edition' is created within
+        the Category aforementioned.
+        Assertions are then made against;
+            1. the feedback message displayed when a book is created.
+            2. the presence of the book in the database.
+            3. that the book retrieved from the database is an instance of
+            models.Book.
+            4. that the book is displayed amongst available books
+        """
+        create_category_url = reverse('category-create')
+        programming = {
+            'name': 'Programming'
+        }
+        response = self.client.post(create_category_url, programming)
+
+        # It doesn't hurt to assert that the category has been persisted to
+        # the database
+        prog_obj = models.Category.objects.filter(name=programming['name'])
+        self.assertTrue(prog_obj)
+
+        create_book_url = reverse('book-create')
+
+        jhtp4 = {
+            'category': prog_obj[0].id,
+            'title': 'Java, How To Program, 4th Edition'
+        }
+        response = self.client.post(create_book_url, jhtp4)
+
+        self.assertContains(
+            response,
+            '<p>{0} added to {1} category!</p>'.format(
+                jhtp4['title'], programming['name']),
+            count=1,
+            status_code=201,
+            html=True
+        )
+
+        self.assertTemplateUsed(response, 'book-create.html')
+
+        # fetch the book from the database and assert its truthy value
+        created_book = models.Book.objects.filter(title=jhtp4['title'])[0]
+        self.assertTrue(created_book)
+        # also assert that the model object retrieved is an instance of Book
+        # model
+        self.assertTrue(isinstance(created_book, models.Book))
+        # assert that the book is listed in the create-book page
+        response = self.client.get(create_book_url)
+
+        self.assertContains(
+            response,
+            '<li>{0} ({1})</li>'.format(
+                created_book.title, created_book.category.name),
+            count=1,
+            status_code=200,
+            html=True
+        )

@@ -8,4 +8,5 @@ urlpatterns = [
         views.category_edit, name='category-edit'),
     url(r'^category/delete/(?P<categ_id>[0-9]+)$',
         views.category_delete, name='category-delete'),
+    url(r'^book/create', views.book_create, name='book-create'),
 ]
