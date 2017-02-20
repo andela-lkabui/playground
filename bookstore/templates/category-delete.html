@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Delete Category</title>
+    </head>
+    <body>
+        <div>
+            <hr>
+            <p>Category Details</p>
+            <hr>
+                {% if category %}
+                    <p><strong>Name:</strong>{{ category.name }}</p>
+                {% else %}
+                    <p>Category of id {{ categ_id }} does not exist!</p>
+                {% endif %}
+            <hr>
+            <form action="{% url 'category-delete' categ_id=categ_id %}" method="POST">
+                {% csrf_token %}
+                <input type="submit" value="Delete Category" />
+            </form>
+        </div>
+    </body>
+</html>

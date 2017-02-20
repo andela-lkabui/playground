@@ -157,3 +157,69 @@ class BookstoreTests(TestCase):
 
         # assert that math_obj and eng_obj have same ID
         self.assertEqual(eng_obj.id, math_obj.id)
+
+    def test_user_can_delete_categories(self):
+        """
+        This test creates a category and persists it to the database.
+
+        Then assertion are made to ensure;
+            1. that the aforementioned category is listed in the
+            'available categories' section.
+            2. that the category is deleted.
+            3. that the category no longer appears in the 'available categories'
+            when it has been deleted.
+            4. that the category is no longer in the database.
+        """
+        # check to ensure that the database has no category entries
+        categories = models.Category.objects.all()
+        self.assertFalse(categories)
+
+        # the reverse method takes in the name of a url and constructs the url.
+        create_url = reverse('category-create')
+        # create a Category (to be deleted later)
+        cs = {
+          'name': 'Computer Science'
+        }
+        response = self.client.post(create_url, cs)
+        # It doesn't hurt to assert that the category has been persisted to
+        # the database
+        cs_obj = models.Category.objects.filter(name=cs['name'])[0]
+        self.assertTrue(cs_obj)
+        # assert that the category is listed amongst available categories
+        self.assertContains(
+            response,
+            '<li>{0}</li>'.format(cs['name']),
+            count=1,
+            status_code=201,
+            html=True
+        )
+
+        kwargs = {
+            'categ_id': cs_obj.id
+        }
+        delete_url = reverse('category-delete', kwargs=kwargs)
+
+        response = self.client.post(delete_url)
+
+        self.assertContains(
+            response,
+            '<p>Category of id {0} does not exist!</p>'.format(
+                cs_obj.id),
+            count=1,
+            status_code=200,
+            html=True
+        )
+
+        self.assertTemplateUsed(response, 'category-delete.html')
+
+        response = self.client.get(create_url)
+        self.assertNotContains(
+            response,
+            '<li>{0}</li>'.format(cs['name']),
+            status_code=200,
+            html=True
+        )
+
+        # assert that the category has been deleted from the database
+        deleted_categ = models.Category.objects.filter(name=cs['name'])
+        self.assertFalse(deleted_categ)

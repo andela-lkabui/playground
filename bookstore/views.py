@@ -37,3 +37,19 @@ def category_edit(request, categ_id):
             successfully!'.format(edit_obj.id)
         return render(request, 'category-edit.html', context)
     return render(request, 'category-edit.html', context)
+
+
+def category_delete(request, categ_id):
+    context = {
+        'categ_id': categ_id
+    }
+    try:
+        context['category'] = models.Category.objects.get(pk=categ_id)
+        if request.method == 'POST':
+            context['category'].delete()
+            context['category'] = None
+            return render(request, 'category-delete.html', context)
+    except models.Category.DoesNotExist:
+        context['category'] = None
+    return render(request, 'category-delete.html', context)
+
