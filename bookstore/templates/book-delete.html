@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Book Delete</title>
+    </head>
+    <body>
+        <hr/>
+
+        {% if book %}
+            <div>
+                <p><strong>Category: </strong>{{ book.category.name }}</p>
+                <p><strong>Title: </strong>{{ book.title }}</p>
+            </div>
+            <hr/>
+
+            <form method="POST" action="{% url 'book-delete' book.id %}">
+                {% csrf_token %}
+                <input type="submit" value="Delete Book" />
+            </form>
+
+        {% endif %}
+
+        <hr/>
+
+        <div>
+            <p>{{ feedback }}</p>
+        </div>
+    </body>
+</html>

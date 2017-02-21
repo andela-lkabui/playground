@@ -95,3 +95,21 @@ def book_edit(request, book_id):
         return render(request, 'book-edit.html', context)
     return render(request, 'book-edit.html', context)
 
+
+def book_delete(request, book_id):
+    try:
+        context = {
+            'book': models.Book.objects.get(pk=book_id)
+        }
+        if request.method == 'POST':
+            title = context['book'].title
+            context['book'].delete()
+            context['book'] = None
+            context['feedback'] = 'Book: {0} deleted!'.format(title)
+            return render(request, 'book-delete.html', context)
+        return render(request, 'book-delete.html', context)
+    except models.Book.DoesNotExist:
+        context = {
+            'feedback': 'Book of id {0} does not exist!'.format(book_id)
+        }
+        return render(request, 'book-delete.html', context)

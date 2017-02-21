@@ -365,4 +365,82 @@ class BookstoreTests(TestCase):
             title=correct_spell['title'], category=english_obj)
         self.assertTrue(correct_obj)
 
+    def test_user_can_delete_a_book(self):
+        """
+        This test creates a category within which a book is added.
+
+        The book is then deleted and the following assertions are made;
+            1. that the book has been removed from the database.
+            2. that the page displays feedback to the user once the book is
+            deleted.
+            3. that the book no longer appears in the available books section.
+            4. that the correct template was used when deleting the book.
+        """
+        create_category_url = reverse('category-create')
+        programming = {
+            'name': 'Programming'
+        }
+        response = self.client.post(create_category_url, programming)
+        # It doesn't hurt to assert that the category has been persisted to
+        # the database
+        prog_obj = models.Category.objects.filter(name=programming['name'])[0]
+        self.assertTrue(prog_obj)
+
+        create_book_url = reverse('book-create')
+
+        jhtp4 = {
+            'category': prog_obj.id,
+            'title': 'Java, How To Program, 4th Edition'
+        }
+        response = self.client.post(create_book_url, jhtp4)
+
+        # now to delete the book
+        jhtp4_obj = models.Book.objects.filter(title=jhtp4['title'])[0]
+        kwargs = {
+            'book_id': jhtp4_obj.id
+        }
+        delete_book_url = reverse('book-delete', kwargs=kwargs)
+
+        response = self.client.post(delete_book_url)
+
+        self.assertContains(
+            response,
+            '<p>Book: {0} deleted!</p>'.format(jhtp4_obj.title),
+            count=1,
+            status_code=200,
+            html=True
+        )
+        self.assertTemplateUsed(response, 'book-delete.html')
+
+        # assert the book does not exist
+        deleted_book = models.Book.objects.filter(title=jhtp4['title'])
+        self.assertFalse(deleted_book)
+
+        # assert there is no book at all in the database
+        all_books = models.Book.objects.all()
+        self.assertFalse(all_books)
+
+        # assert page handles request for non existent book
+        # database has no books, so id of 1 obviously doesn't exist
+        kwargs = {
+            'book_id': 1
+        }
+        delete_book_url = reverse('book-delete', kwargs=kwargs)
+        response = self.client.post(delete_book_url)
+
+        self.assertContains(
+            response,
+            '<p>Book of id {0} does not exist!</p>'.format(kwargs['book_id']),
+            count=1,
+            status_code=200,
+            html=True
+        )
+        self.assertTemplateUsed(response, 'book-delete.html')
+        # assert that the book isn't listed amongst available books
+        response = self.client.get(create_book_url)
+        self.assertNotContains(
+            response,
+            '<li>{0} ({1})</li>'.format(jhtp4['title'], programming['name']),
+            status_code=200,
+            html=True
         )

@@ -11,4 +11,6 @@ urlpatterns = [
     url(r'^book/create', views.book_create, name='book-create'),
     url(r'^book/edit/(?P<book_id>[0-9]+)$',
         views.book_edit, name='book-edit'),
+    url(r'^book/delete/(?P<book_id>[0-9]+)$',
+        views.book_delete, name='book-delete'),
 ]
