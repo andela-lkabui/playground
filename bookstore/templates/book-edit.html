@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Edit Book</title>
+    </head>
+    <body>
+        <div>
+            <form action="{% url 'book-edit' book_id=book_id %}" method="POST">
+                {% csrf_token %}
+                {{ book_form }}
+                <input type="submit" value="Edit Book" />
+            </form>
+        </div>
+        <div>
+            <p>{{ feedback }}</p>
+        </div>
+    </body>
+</html>

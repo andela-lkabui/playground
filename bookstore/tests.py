@@ -286,3 +286,83 @@ class BookstoreTests(TestCase):
             status_code=200,
             html=True
         )
+
+    def test_user_can_edit_book_title(self):
+        """
+        This test creates two categories i.e. 'English' and 'Mathematics' and
+        then creates a book within the 'Mathematics' category.
+
+        The book's category and title are then edited and then assertions are
+        made against;
+            1. the truthy value of the book's instance when it's fetched from
+            the database
+            2. the truthy value of the book with the edited title and category
+             when it is fetched from the database.
+            3. The presence of a feedback message when the book is edited.
+            4. The template that is used for editing book details.
+        """
+        create_category_url = reverse('category-create')
+        english = {
+            'name': 'English'
+        }
+        self.client.post(create_category_url, english)
+        # check that English category has been created in the database
+        english_obj = models.Category.objects.filter(name=english['name'])[0]
+        self.assertTrue(english_obj)
+
+        maths = {
+            'name': 'Mathematics'
+        }
+        self.client.post(create_category_url, maths)
+        # check that Mathematics category has been created in the database
+        maths_obj = models.Category.objects.filter(name=maths['name'])[0]
+        self.assertTrue(maths_obj)
+
+        create_book_url = reverse('book-create')
+        # deliberately misspell book title and erroneously classify under Maths
+        misspelt = {
+            'category': maths_obj.id,
+            'title': 'Enlgsih Adi'
+        }
+        self.client.post(create_book_url, misspelt)
+        # check book has been created in db
+        misspelt_obj = models.Book.objects.filter(
+            title=misspelt['title'], category=maths_obj)
+        self.assertTrue(misspelt_obj)
+        # check that the book doesn't exist under English category
+        misspelt_404 = models.Book.objects.filter(
+            title=misspelt['title'], category=english_obj)
+        self.assertFalse(misspelt_404)
+
+        # edit the book
+        kwargs = {
+            'book_id': misspelt_obj[0].id
+        }
+        edit_book_url = reverse('book-edit', kwargs=kwargs)
+        # correct spelling and correct category
+        correct_spell = {
+            'category': english_obj.id,
+            'title': 'English Aid'
+        }
+        response = self.client.post(edit_book_url, correct_spell)
+
+        self.assertContains(
+            response,
+            '<p>Edit successful!</p>',
+            count=1,
+            status_code=200,
+            html=True
+        )
+
+        self.assertTemplateUsed(response, 'book-edit.html')
+
+        # the misspelt version no longer exists
+        misspelt_obj = models.Book.objects.filter(
+            title=misspelt['title'], category=maths_obj)
+        self.assertFalse(misspelt_obj)
+        # the edited version exists instead
+        correct_obj = models.Book.objects.filter(
+            title=correct_spell['title'], category=english_obj)
+        self.assertTrue(correct_obj)
+
+        )

@@ -70,3 +70,28 @@ def book_create(request):
 
     return render(request, 'book-create.html', context)
 
+
+def book_edit(request, book_id):
+    book = models.Book.objects.get(pk=book_id)
+    context = {
+        'book_id': book_id,
+        'book_form': forms.BookForm(initial={
+            'category': book.category,
+            'title': book.title
+            })
+    }
+    if 'title' in request.POST or 'category' in request.POST:
+        if request.POST.get('title') and book.title != request.POST['title']:
+            book.title = request.POST['title']
+
+        new_category = request.POST.get('category')
+        if new_category and book.category != new_category:
+            category = models.Category.objects.get(pk=new_category)
+            book.category = category
+
+        book.save()
+        context['feedback'] = 'Edit successful!'
+
+        return render(request, 'book-edit.html', context)
+    return render(request, 'book-edit.html', context)
+
